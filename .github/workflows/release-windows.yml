@@ -1,0 +1,97 @@
+name: Windows Release
+
+on:
+    workflow_dispatch:
+    push:
+        tags:
+            - "v*"
+
+permissions:
+    contents: write
+
+env:
+    QT_REF: "6.12"
+    QT_DIR: "C:/Qt/6.12"
+
+jobs:
+    windows:
+        runs-on: windows-latest
+
+        steps:
+            - name: Checkout project
+              uses: actions/checkout@v7
+
+            - name: Cache Qt
+              id: qt-cache
+              uses: actions/cache@v6
+              with:
+                  path: C:/Qt/6.12
+                  key: qt-6.12-windows-mingw
+
+            - name: Build Qt
+              if: steps.qt-cache.outputs.cache-hit != 'true'
+              shell: pwsh
+              run: |
+                  git clone --depth 1 --branch $env:QT_REF `
+                    https://code.qt.io/qt/qtbase.git C:/Qt/src
+
+                  New-Item -ItemType Directory -Force C:/Qt/build | Out-Null
+                  Set-Location C:/Qt/build
+
+                  C:/Qt/src/configure.bat `
+                    -prefix C:/Qt/6.12 `
+                    -release `
+                    -opensource `
+                    -confirm-license
+
+                  cmake --build . --parallel
+                  cmake --install .
+
+            - name: Add Qt to PATH
+              shell: pwsh
+              run: |
+                  "C:\Qt\6.12\bin" | Out-File `
+                    -FilePath $env:GITHUB_PATH `
+                    -Encoding utf8 `
+                    -Append
+
+            - name: Configure project
+              shell: pwsh
+              run: |
+                  cmake -S . -B build `
+                    -G Ninja `
+                    -DCMAKE_BUILD_TYPE=Release `
+                    -DCMAKE_PREFIX_PATH=C:/Qt/6.12
+
+            - name: Build project
+              shell: pwsh
+              run: |
+                  cmake --build build --parallel
+
+            - name: Package
+              shell: pwsh
+              run: |
+                  New-Item -ItemType Directory -Force package/ProjectTracker | Out-Null
+
+                  Copy-Item `
+                    build/bin/ProjectTracker.exe `
+                    package/ProjectTracker/
+
+                  windeployqt `
+                    --release `
+                    package/ProjectTracker/ProjectTracker.exe
+
+                  Compress-Archive `
+                    package/ProjectTracker/* `
+                    ProjectTracker-Windows-x64.zip
+
+            - name: Create GitHub Release
+              shell: pwsh
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  gh release create `
+                    "${{ github.ref_name }}" `
+                    ProjectTracker-Windows-x64.zip `
+                    --verify-tag `
+                    --generate-notes
