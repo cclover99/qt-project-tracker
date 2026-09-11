@@ -14,5 +14,5 @@ cmake --build build
 
 Run
 ```
-./build/ProjectTracker.exe
+./build/bin/ProjectTracker.exe
 ```

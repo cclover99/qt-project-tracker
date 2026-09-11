@@ -17,5 +17,8 @@ qt_add_executable(ProjectTracker
 
 target_link_libraries(ProjectTracker PRIVATE Qt6::Widgets)
 
+# Place binaries inside build/bin/
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+
 # Launch without console
 # set_target_properties(ProjectTracker PROPERTIES WIN32_EXECUTABLE ON)
