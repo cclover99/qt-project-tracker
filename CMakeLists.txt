@@ -12,20 +12,26 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets Sql)
 
 qt_standard_project_setup()
 
-qt_add_executable(ProjectTracker
+set(SOURCE_FILES
     src/main.cpp
     src/mainwindow.cpp
     src/mainwindow.hpp
     src/database.cpp
     src/database.hpp
-    src/widgets/projectTitle.cpp
-    src/widgets/projectTitle.hpp
+    src/widgets/projecttitle.cpp
+    src/widgets/projecttitle.hpp
 )
 
-target_link_libraries(ProjectTracker PRIVATE 
+set(LINK_LIBRARIES
     Qt6::Widgets
     Qt6::Sql
 )
 
-# Launch without console
-# set_target_properties(ProjectTracker PROPERTIES WIN32_EXECUTABLE ON)
+# GUI executable
+qt_add_executable(ProjectTracker ${SOURCE_FILES})
+target_link_libraries(ProjectTracker PRIVATE ${LINK_LIBRARIES})
+set_target_properties(ProjectTracker PROPERTIES WIN32_EXECUTABLE ON)
+
+# Console executable
+qt_add_executable(ProjectTrackerConsole ${SOURCE_FILES})
+target_link_libraries(ProjectTrackerConsole PRIVATE ${LINK_LIBRARIES})
