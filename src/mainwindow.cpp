@@ -39,7 +39,7 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
 
     sidebarLayout = new QVBoxLayout(sidebar);
 
-    auto* projectsTitle = new QLabel("Projects\n");
+    auto* projectsTitle = new QLabel("Projects");
     projectsTitle->setStyleSheet(R"(
         QLabel {
             margin-top: 4px;
@@ -52,6 +52,8 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     projectsTitle->setFont(titleFont);
     
     sidebarLayout->addWidget(projectsTitle);
+
+    sidebarLayout->addSpacing(20);
 
     projectViews = new QStackedWidget;
 
@@ -116,7 +118,7 @@ QWidget* MainWindow::addProject(const Project& project) {
         }
 
         QPushButton:hover {
-            background-color: rgba(255, 255, 255, 20);
+            background-color: rgba(255, 255, 255, 10);
             border-radius: 5px;
         }
     )");
@@ -145,6 +147,8 @@ QWidget* MainWindow::addProject(const Project& project) {
     );
 
     viewLayout->addWidget(title, 0, Qt::AlignLeft);
+
+    viewLayout->addSpacing(18);
 
     auto* description = new ProjectDescription(project.description);
 

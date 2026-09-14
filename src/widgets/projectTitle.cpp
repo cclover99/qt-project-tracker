@@ -15,11 +15,6 @@ ProjectTitle::ProjectTitle(const QString& text, QWidget* parent): QLineEdit(text
             border: none;
             margin-top: 1px;
         }
-
-        QLineEdit:focus {
-            background-color: rgba(255, 255, 255, 20);
-            border-radius: 4px;   
-        }
     )");
 
     QFont titleFont = font();
