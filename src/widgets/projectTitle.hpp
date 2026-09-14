@@ -14,6 +14,7 @@ public:
     void setTitle(const QString& text);
 
     QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
 
 signals:
     void renameRequested(

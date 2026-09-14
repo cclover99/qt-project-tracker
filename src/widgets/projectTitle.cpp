@@ -18,9 +18,8 @@ ProjectTitle::ProjectTitle(const QString& text, QWidget* parent): QLineEdit(text
 
         QLineEdit:focus {
             background-color: rgba(255, 255, 255, 20);
-            border-radius: 4px;
+            border-radius: 4px;   
         }
-        
     )");
 
     QFont titleFont = font();
@@ -38,6 +37,10 @@ ProjectTitle::ProjectTitle(const QString& text, QWidget* parent): QLineEdit(text
 void ProjectTitle::setTitle(const QString& text) {
     originalText = text;
     setText(text);
+}
+
+QSize ProjectTitle::minimumSizeHint() const {
+    return QSize(1, QLineEdit::minimumSizeHint().height());
 }
 
 QSize ProjectTitle::sizeHint() const {
