@@ -15,6 +15,10 @@
 #include <QMenu>
 #include <QMessageBox>
 
+#include <QApplication>
+#include <QStyle>
+#include <QIcon>
+
 MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     setWindowTitle("Project Tracker");
     resize(1000, 700);
@@ -184,7 +188,21 @@ void MainWindow::addProject(const Project& project) {
         [this, button, view, project](const QPoint& pos) {
             QMenu menu(button);
 
-            QAction* deleteAction = menu.addAction("Delete project");
+            
+
+            QMenu* folderMenu = menu.addMenu(
+                QIcon::fromTheme("folder"),
+                "Move to folder"
+            );
+            folderMenu->menuAction()->setEnabled(false);
+
+            QAction* placeholderFolder = folderMenu->addAction("No folders available");
+            placeholderFolder->setEnabled(false);
+
+            QAction* deleteAction = menu.addAction(
+                QIcon::fromTheme("edit-delete"),
+                "Delete project"
+            );
 
             QAction* selectedAction = menu.exec(
                 button->mapToGlobal(pos)
