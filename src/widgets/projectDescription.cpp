@@ -2,27 +2,31 @@
 
 #include <QFocusEvent>
 #include <QKeyEvent>
+#include <QTextBlock>
+#include <QAbstractTextDocumentLayout>
+#include <QFontMetricsF>
+#include <QtMath>
 
 
 ProjectDescription::ProjectDescription(const QString& text, QWidget* parent): QPlainTextEdit(text, parent), originalText(text) {
     // setFrame(false);
 
     setStyleSheet(R"(
-        QPlainTextEdit {
-            background-color: rgba(255, 255, 255, 20);
-            border-radius: 4px;
+        QPlainTextEdit {            
             border: none;
-        }
+            border-radius 4px;
+            background-color: rgba(255, 255, 255, 10);
+        }        
 
-        QPlainTextEdit:focus {
-            border: none;
+        QPlainTextEdit {
+            border-radius: 4px;
         }
-        
     )");
 
-    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-
     setPlaceholderText("Add description...");
+
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     connect(this, &QPlainTextEdit::textChanged, this, [this]() {
         updateGeometry();
@@ -35,12 +39,24 @@ void ProjectDescription::setDescription(const QString& text) {
 }
 
 QSize ProjectDescription::sizeHint() const {
-    QFontMetrics metrics(font());
+    auto* layout = document()->documentLayout();
+    const qreal margin = document()->documentMargin();
+
+    qreal contentHeight = margin;
+
+    for (QTextBlock block = document()->begin();
+         block.isValid();
+         block = block.next()) {
+        contentHeight += layout->blockBoundingRect(block).height();
+    }
+
+    const qreal lineHeight = qCeil(QFontMetricsF(document()->defaultFont()).height());
+    const qreal minimumHeight = 3 * lineHeight + 2 * margin;
 
     return {
-        metrics.horizontalAdvance(toPlainText()) + 5 + 4,
-        QPlainTextEdit::sizeHint().height()
-    };
+    QPlainTextEdit::sizeHint().width(),
+    qCeil(qMax(contentHeight, minimumHeight)) + 2 * frameWidth() + 1
+};
 }
 
 void ProjectDescription::focusInEvent(QFocusEvent* event) {
