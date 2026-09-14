@@ -14,12 +14,12 @@
 #include <QWidget>
 #include <QMenu>
 #include <QMessageBox>
-
 #include <QApplication>
 #include <QStyle>
 #include <QIcon>
+#include <QGridLayout>
 
-MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
+MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {  
     setWindowTitle("Project Tracker");
     resize(1000, 700);
 
@@ -76,20 +76,33 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     }
 
     connect(addProjectButton, &QPushButton::clicked, this, [this]() {
-        bool ok;
+        QInputDialog dialog(this);
 
-        QString name = QInputDialog::getText(
-            this,
-            "New Project",
-            "Project name:",
-            QLineEdit::Normal,
-            "",
-            &ok
+        dialog.setWindowFlags(
+            Qt::Dialog |
+            Qt::CustomizeWindowHint |
+            Qt::WindowTitleHint |
+            Qt::WindowCloseButtonHint
         );
 
-        name = name.trimmed();
+        dialog.setWindowTitle("Create New Project");
+        dialog.setLabelText("Project name:");
+        dialog.setInputMode(QInputDialog::TextInput);
+        dialog.setTextEchoMode(QLineEdit::Normal);
 
-        if (!ok || name.isEmpty())
+        QLabel* label = dialog.findChild<QLabel*>();
+
+        if (label)
+            label->hide();
+
+        dialog.resize(350, 140);
+
+        if (dialog.exec() != QDialog::Accepted)
+            return;
+
+        QString name = dialog.textValue().trimmed();
+
+        if (name.isEmpty())
             return;
 
         Project project = Database::createProject(name);
@@ -188,12 +201,11 @@ void MainWindow::addProject(const Project& project) {
         [this, button, view, project](const QPoint& pos) {
             QMenu menu(button);
 
-            
-
             QMenu* folderMenu = menu.addMenu(
                 QIcon::fromTheme("folder"),
                 "Move to folder"
             );
+            
             folderMenu->menuAction()->setEnabled(false);
 
             QAction* placeholderFolder = folderMenu->addAction("No folders available");
@@ -211,14 +223,30 @@ void MainWindow::addProject(const Project& project) {
             if (selectedAction != deleteAction)
                 return;
 
-            QMessageBox::StandardButton result = QMessageBox::question(
-                this,
-                "Delete Project",
-                QString("Are you sure you want to delete \"%1\"?")
-                    .arg(project.name),
-                QMessageBox::Yes | QMessageBox::No,
-                QMessageBox::No
-            );
+            QMessageBox messageBox(this);
+
+            messageBox.setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+
+            messageBox.setWindowTitle("Delete Project");
+            messageBox.setText(QString("Are you sure you want to delete \"%1\"?").arg(button->text()));
+
+            messageBox.setIcon(QMessageBox::Question);
+
+            messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+
+            messageBox.setDefaultButton(QMessageBox::No);
+
+            // Remove extra padding to the right of the icon
+            // if (QGridLayout* layout = qobject_cast<QGridLayout*>(messageBox.layout())) {
+            //     layout->setHorizontalSpacing(2);
+            // }
+
+            // Add extra spacing to the left of the icon
+            if (QLabel* iconLabel = messageBox.findChild<QLabel*>("qt_msgboxex_icon_label")) {
+                iconLabel->setStyleSheet("margin-left: 8px;");
+            }
+
+            QMessageBox::StandardButton result = static_cast<QMessageBox::StandardButton>(messageBox.exec());
 
             if (result != QMessageBox::Yes)
                 return;
