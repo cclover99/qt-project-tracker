@@ -7,6 +7,8 @@
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
 
+    QCoreApplication::setApplicationName("ProjectTracker");
+
     QFont appFont = QApplication::font();
     appFont.setFamilies({"Segoe UI Variable", "Segoe UI"});
 
