@@ -6,6 +6,7 @@
 struct Project {
     int id;
     QString name;
+    QString description;
     QString createdAt;
 };
 
@@ -16,5 +17,6 @@ public:
     static QVector<Project> getProjects();
     static Project createProject(const QString& name);
     static bool renameProject(int id, const QString& name);
+    static bool updateDescription(int id, const QString& description);
     static bool deleteProject(int id);
 };

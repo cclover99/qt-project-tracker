@@ -31,11 +31,11 @@ bool Database::initialize() {
         CREATE TABLE IF NOT EXISTS projects (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
+            description TEXT NOT NULL DEFAULT '',
             created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
     )")) {
-        qCritical() << "Failed to create projects table:"
-                    << query.lastError().text();
+        qCritical() << "Failed to create projects table:" << query.lastError().text();
         return false;
     }
 
@@ -46,7 +46,7 @@ QVector<Project> Database::getProjects() {
     QVector<Project> projects;
 
     QSqlQuery query(
-        "SELECT id, name, created_at "
+        "SELECT id, name, description, created_at "
         "FROM projects "
         "ORDER BY created_at"
     );
@@ -55,7 +55,8 @@ QVector<Project> Database::getProjects() {
         projects.append({
             query.value(0).toInt(),
             query.value(1).toString(),
-            query.value(2).toString()
+            query.value(2).toString(),
+            query.value(3).toString()
         });
     }
 
@@ -80,7 +81,7 @@ Project Database::createProject(const QString& name) {
 
     QSqlQuery projectQuery;
     projectQuery.prepare(
-        "SELECT id, name, created_at "
+        "SELECT id, name, description, created_at "
         "FROM projects WHERE id = ?"
     );
 
@@ -91,7 +92,8 @@ Project Database::createProject(const QString& name) {
     return {
         projectQuery.value(0).toInt(),
         projectQuery.value(1).toString(),
-        projectQuery.value(2).toString()
+        projectQuery.value(2).toString(),
+        projectQuery.value(3).toString()
     };
 }
 
@@ -102,8 +104,7 @@ bool Database::deleteProject(int id) {
     query.addBindValue(id);
 
     if (!query.exec()) {
-        qCritical() << "Failed to delete project:"
-                    << query.lastError().text();
+        qCritical() << "Failed to delete project:" << query.lastError().text();
         return false;
     }
 
@@ -118,7 +119,22 @@ bool Database::renameProject(int id, const QString& name) {
     query.addBindValue(id);
 
     if (!query.exec()) {
-        qCritical() << "Failed to rename project:"
+        qCritical() << "Failed to rename project:" << query.lastError().text();
+        return false;
+    }
+
+    return true;
+}
+
+bool Database::updateDescription(int id, const QString& description) {
+    QSqlQuery query;
+
+    query.prepare("UPDATE projects SET description = ? WHERE id = ?");
+    query.addBindValue(description);
+    query.addBindValue(id);
+
+    if (!query.exec()) {
+        qCritical() << "Failed to update project description:"
                     << query.lastError().text();
         return false;
     }

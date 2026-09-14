@@ -1,6 +1,7 @@
 #include "mainwindow.hpp"
 
 #include "widgets/projectTitle.hpp"
+#include "widgets/projectDescription.hpp"
 
 #include <QInputDialog>
 #include <QLabel>
@@ -136,10 +137,7 @@ void MainWindow::addProject(const Project& project) {
         title,
         &ProjectTitle::renameRequested,
         this,
-        [title, button, projectId = project.id](
-            const QString& oldName,
-            const QString& newName
-        ) {
+        [title, button, projectId = project.id] (const QString& oldName, const QString& newName) {
             if (Database::renameProject(projectId, newName)) {
                 button->setText(newName);
             } else {
@@ -149,8 +147,24 @@ void MainWindow::addProject(const Project& project) {
     );
 
     viewLayout->addWidget(title, 0, Qt::AlignLeft);
-    viewLayout->addStretch();
 
+    auto* description = new ProjectDescription(project.description);
+
+    connect(
+        description,
+        &ProjectDescription::descriptionChanged,
+        this,
+        [description, projectId = project.id] (const QString& oldDescription, const QString& newDescription) {
+            if (!Database::updateDescription(projectId, newDescription)) {
+                description->setDescription(oldDescription);
+            }
+        }
+    );
+
+    viewLayout->addWidget(description);
+
+    // Add the view widget
+    viewLayout->addStretch();
     projectViews->addWidget(view);
 
     int addButtonIndex = sidebarLayout->indexOf(addProjectButton);

@@ -18,8 +18,12 @@ set(SOURCE_FILES
     src/mainwindow.hpp
     src/database.cpp
     src/database.hpp
+
     src/widgets/projecttitle.cpp
     src/widgets/projecttitle.hpp
+
+    src/widgets/projectdescription.cpp
+    src/widgets/projectdescription.hpp
 )
 
 set(LINK_LIBRARIES
