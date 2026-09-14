@@ -63,7 +63,28 @@ QVector<Project> Database::getProjects() {
     return projects;
 }
 
-Project Database::createProject(const QString& name) {
+Project Database::createProject() {
+    QString name = "New Project";
+    int number = 2;
+
+    while (true) {
+        QSqlQuery check;
+
+        check.prepare(
+            "SELECT 1 FROM projects "
+            "WHERE name = ? "
+            "LIMIT 1"
+        );
+
+        check.addBindValue(name);
+        check.exec();
+
+        if (!check.next())
+            break;
+
+        name = QString("New Project %1").arg(number++);
+    }
+
     QSqlQuery query;
 
     query.prepare(
@@ -134,8 +155,7 @@ bool Database::updateDescription(int id, const QString& description) {
     query.addBindValue(id);
 
     if (!query.exec()) {
-        qCritical() << "Failed to update project description:"
-                    << query.lastError().text();
+        qCritical() << "Failed to update project description:" << query.lastError().text();
         return false;
     }
 

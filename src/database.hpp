@@ -15,7 +15,7 @@ public:
     static bool initialize();
 
     static QVector<Project> getProjects();
-    static Project createProject(const QString& name);
+    static Project createProject();
     static bool renameProject(int id, const QString& name);
     static bool updateDescription(int id, const QString& description);
     static bool deleteProject(int id);

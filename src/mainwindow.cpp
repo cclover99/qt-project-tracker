@@ -76,39 +76,20 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     }
 
     connect(addProjectButton, &QPushButton::clicked, this, [this]() {
-        QInputDialog dialog(this);
+        Project project = Database::createProject();
 
-        dialog.setWindowFlags(
-            Qt::Dialog |
-            Qt::CustomizeWindowHint |
-            Qt::WindowTitleHint |
-            Qt::WindowCloseButtonHint
-        );
-
-        dialog.setWindowTitle("Create New Project");
-        dialog.setLabelText("Project name:");
-        dialog.setInputMode(QInputDialog::TextInput);
-        dialog.setTextEchoMode(QLineEdit::Normal);
-
-        QLabel* label = dialog.findChild<QLabel*>();
-
-        if (label)
-            label->hide();
-
-        dialog.resize(350, 140);
-
-        if (dialog.exec() != QDialog::Accepted)
+        if (project.id == 0)
             return;
 
-        QString name = dialog.textValue().trimmed();
+        QWidget* view = addProject(project);
+        projectViews->setCurrentWidget(view);
 
-        if (name.isEmpty())
-            return;
-
-        Project project = Database::createProject(name);
-
-        if (project.id != 0)
-            addProject(project);
+        // Auto focus title
+        // ProjectTitle* title = view->findChild<ProjectTitle*>();
+        // if (title) {
+        //     title->setFocus();
+        //     title->selectAll();
+        // }
     });
 
     splitter->addWidget(sidebar);
@@ -123,7 +104,7 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     setCentralWidget(splitter);
 }
 
-void MainWindow::addProject(const Project& project) {
+QWidget* MainWindow::addProject(const Project& project) {
     auto* button = new QPushButton(project.name);
 
     button->setStyleSheet(R"(
@@ -205,7 +186,7 @@ void MainWindow::addProject(const Project& project) {
                 QIcon::fromTheme("folder"),
                 "Move to folder"
             );
-            
+
             folderMenu->menuAction()->setEnabled(false);
 
             QAction* placeholderFolder = folderMenu->addAction("No folders available");
@@ -226,14 +207,10 @@ void MainWindow::addProject(const Project& project) {
             QMessageBox messageBox(this);
 
             messageBox.setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
-
             messageBox.setWindowTitle("Delete Project");
             messageBox.setText(QString("Are you sure you want to delete \"%1\"?").arg(button->text()));
-
             messageBox.setIcon(QMessageBox::Question);
-
             messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-
             messageBox.setDefaultButton(QMessageBox::No);
 
             // Remove extra padding to the right of the icon
@@ -263,4 +240,6 @@ void MainWindow::addProject(const Project& project) {
             button->deleteLater();
         }
     );
+
+    return view;
 }

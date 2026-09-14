@@ -13,7 +13,7 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
 
 private:
-    void addProject(const Project& project);
+    QWidget* addProject(const Project& project);
 
     QVBoxLayout* sidebarLayout;
     QStackedWidget* projectViews;
